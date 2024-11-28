@@ -1,6 +1,6 @@
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { DatabaseModule } from '@/database';
-import { HealthController } from '@/api/controllers';
+import { AuthController, HealthController } from '@/api/controllers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { QueueModule } from '@/queue/queue.module';
@@ -11,6 +11,12 @@ import { redisStore } from 'cache-manager-redis-store';
 import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { configAuth } from './configs/auth';
 import { configCache } from './configs/cache';
+import { GoogleStrategy } from './auth-strategies';
+import { AuthService } from '@/api/services';
+
+const authStrategies = [GoogleStrategy];
+const services = [AuthService];
+
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -46,12 +52,14 @@ import { configCache } from './configs/cache';
       inject: [ConfigService],
     }),
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, AuthController],
   providers: [
     {
       provide: APP_GUARD,
       useClass: CustomThrottlerGuard,
     },
+    ...authStrategies,
+    ...services,
   ],
 })
 export class ApiModule implements OnApplicationBootstrap {

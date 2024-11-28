@@ -3,15 +3,14 @@ import { configDb } from './configs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '@/database/entities';
-import { AdminConfigRepository, UserRepository } from './repositories';
-import { AdminConfigEntity } from './entities/admin-config.entity';
+import { UserRepository } from './repositories';
 import { SeedDatabase } from './seeders/seed.database';
 
-const repositories = [UserRepository, AdminConfigRepository];
+const repositories = [UserRepository];
 
 const services = [];
 
-const entities = [UserEntity, AdminConfigEntity];
+const entities = [UserEntity];
 
 @Module({
   imports: [

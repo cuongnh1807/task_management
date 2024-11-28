@@ -24,16 +24,7 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    if (
-      !process.env.APP_ENV ||
-      process.env.APP_ENV === 'local' ||
-      request.originalUrl === '/blogs' ||
-      (request.originalUrl.startsWith('/blogs?') &&
-        request.method === 'GET' &&
-        !token)
-    ) {
-      return true;
-    }
+
     if (token) {
       try {
         const payload: TJWTPayload = await this.jwtService.verifyAsync(token, {
