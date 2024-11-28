@@ -1,5 +1,5 @@
 import { UserRepository } from '@/database/repositories';
-import { Controller, ForbiddenException, Get } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 // const Sentry = require("@sentry/node");
 // import * as Sentry from '@sentry/node';

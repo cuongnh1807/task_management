@@ -14,7 +14,6 @@ if (isWorker) {
 }
 @Module({
   imports: [..._modules],
-  controllers: [],
   providers: [],
 })
 export class AppModule {}

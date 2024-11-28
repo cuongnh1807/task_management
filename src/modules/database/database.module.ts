@@ -2,15 +2,39 @@ import { Module } from '@nestjs/common';
 import { configDb } from './configs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '@/database/entities';
-import { UserRepository } from './repositories';
+import {
+  CommentEntity,
+  NotificationEntity,
+  ProjectEntity,
+  TaskEntity,
+  UserEntity,
+} from '@/database/entities';
+import {
+  CommentRepository,
+  NotificationRepository,
+  ProjectRepository,
+  TaskRepository,
+  UserRepository,
+} from './repositories';
 import { SeedDatabase } from './seeders/seed.database';
 
-const repositories = [UserRepository];
+const repositories = [
+  UserRepository,
+  ProjectRepository,
+  CommentRepository,
+  NotificationRepository,
+  TaskRepository,
+];
 
 const services = [];
 
-const entities = [UserEntity];
+const entities = [
+  UserEntity,
+  ProjectEntity,
+  TaskEntity,
+  CommentEntity,
+  NotificationEntity,
+];
 
 @Module({
   imports: [

@@ -1,5 +1,8 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { TaskEntity } from './task.entity';
+import { CommentEntity } from './comment.entity';
+import { NotificationEntity } from './notification.entity';
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
@@ -17,4 +20,16 @@ export class UserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   password: string;
+
+  @OneToMany(() => TaskEntity, (e) => e.assignee)
+  @JoinColumn({ name: 'id' })
+  assigned_tasks: TaskEntity[];
+
+  @OneToMany(() => CommentEntity, (e) => e.user)
+  @JoinColumn({ name: 'id' })
+  comments: CommentEntity[];
+
+  @OneToMany(() => NotificationEntity, (e) => e.user)
+  @JoinColumn({ name: 'id' })
+  notifications: NotificationEntity[];
 }

@@ -67,7 +67,9 @@ export class AuthService {
     };
     const accessToken = await this.jwtService.signAsync(payload, {
       subject: user.id,
-      expiresIn: this.configService.get<number>('auth.access_token_lifetime'),
+      expiresIn: this.configService.get<number>(
+        'auth.jwt.access_token_lifetime',
+      ),
       issuer: user.id,
     });
     return {
