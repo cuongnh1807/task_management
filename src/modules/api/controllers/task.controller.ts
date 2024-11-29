@@ -13,16 +13,20 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { TaskService } from '../services';
+import { CommentService, TaskService } from '../services';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CreateTaskDto, GetTaskDto, UpdateTaskDto } from '../dtos/task.dto';
 import { HttpCacheInterceptor } from '../cache';
+import { CreateCommentDto, GetCommentDto } from '../dtos/comment.dto';
 
 @Controller('tasks')
 @ApiTags('Tasks')
 @ApiBearerAuth()
 export class TaskController {
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private commentService: CommentService,
+  ) {}
 
   @Post('')
   @UseGuards(JwtAuthGuard)
@@ -80,6 +84,40 @@ export class TaskController {
     return {
       statusCode: HttpStatus.OK,
       data: result,
+    };
+  }
+
+  @Post('/:id/comments')
+  @UseGuards(JwtAuthGuard)
+  public async createComment(
+    @Request() req: any,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() data: CreateCommentDto,
+  ) {
+    const newComment = await this.commentService.createComment(
+      id,
+      req.user.sub,
+      data,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: newComment,
+    };
+  }
+
+  @Get('/:id/comments')
+  @UseGuards(JwtAuthGuard)
+  public async getListCommentByTask(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Query() data: GetCommentDto,
+  ) {
+    const comments = await this.commentService.getListComments({
+      ...data,
+      task_ids: [id],
+    });
+    return {
+      statusCode: HttpStatus.OK,
+      data: comments,
     };
   }
 }

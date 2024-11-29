@@ -50,6 +50,14 @@ export type TNotificationReponse = {
   created_at: Date | string;
 };
 
+export type TCommentReponse = {
+  id: string;
+  content: string;
+  user_id: string;
+  task_id: string;
+  attachment_urls?: string[];
+};
+
 export class PaginationType<T> {
   items: T[];
   meta: {
