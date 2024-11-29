@@ -20,7 +20,7 @@ export class TaskEntity extends BaseEntity {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @Column({ type: 'enum', enum: EPriority, nullable: true })
@@ -32,7 +32,7 @@ export class TaskEntity extends BaseEntity {
   @Column({ type: 'enum', enum: ETaskType, default: ETaskType.TASK })
   type: ETaskType;
 
-  @Column()
+  @Column({ nullable: true })
   code: string;
 
   @Column({

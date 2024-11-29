@@ -1,12 +1,19 @@
-import { UserRepository } from '@/database/repositories';
-import { Injectable } from '@nestjs/common';
+import {
+  NotificationRepository,
+  UserRepository,
+} from '@/database/repositories';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateProfileDto } from '@/api/dtos/profile.dto';
-import { UserEntity } from '@/database/entities';
+import { NotificationEntity, UserEntity } from '@/database/entities';
 import { GetUserDto } from '@/api/dtos/user.dto';
+import { ENotificationStatus } from '@/shared/constants/enums';
 
 @Injectable()
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private notificationRepository: NotificationRepository,
+  ) {}
 
   getProfileById = async (user_id: string) => {
     const user = await this.userRepository.findOneById(user_id, [
@@ -21,20 +28,20 @@ export class UserService {
 
   updateProfile = async (user_id: string, data: UpdateProfileDto) => {
     const newUser = await this.userRepository
-      .createQueryBuilder('user')
+      .createQueryBuilder()
       .update(UserEntity)
       .set(data)
-      .where(`user.id = :id`, { id: user_id })
+      .where(`id = :id`, { id: user_id })
       .returning([
-        'user.id',
-        'user.avatar_url',
-        'user.username',
-        'user.email',
-        'user.created_at',
-        'user.updated_at',
+        'id',
+        'avatar_url',
+        'username',
+        'email',
+        'created_at',
+        'updated_at',
       ])
       .execute();
-    return newUser;
+    return newUser.raw[0];
   };
 
   getAllUsers = async (query: GetUserDto) => {
@@ -50,4 +57,42 @@ export class UserService {
     });
     return { items, meta };
   };
+
+  async countUnreadNotification(user_id: string) {
+    const query = this.notificationRepository.getQuery({
+      user_ids: [user_id],
+      statuses: [ENotificationStatus.UNREAD],
+    });
+    const result = await query.getCount();
+    return result;
+  }
+
+  async readNotification(user_id: string, id: string) {
+    const existedNotification = await this.notificationRepository.findOneBy({
+      id,
+    });
+    if (existedNotification.user_id !== user_id) {
+      throw new BadRequestException('Not allow to change notification status');
+    }
+    if (existedNotification.status === ENotificationStatus.READ) {
+      throw new BadRequestException('notification was read');
+    }
+    await this.notificationRepository.save({
+      ...existedNotification,
+      status: ENotificationStatus.READ,
+    });
+  }
+
+  async markReadAllNotification(user_id: string) {
+    await this.notificationRepository
+      .createQueryBuilder('notification')
+      .update(NotificationEntity)
+      .set({ status: ENotificationStatus.READ })
+      .where('notification.user_id = :user_id', { user_id })
+      .andWhere('notification.status = :status', {
+        status: ENotificationStatus.UNREAD,
+      })
+      .execute();
+    return true;
+  }
 }

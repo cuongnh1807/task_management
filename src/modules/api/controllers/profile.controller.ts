@@ -6,18 +6,25 @@ import {
   HttpStatus,
   Body,
   Put,
+  Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserService } from '../services';
+import { NotificationService, UserService } from '../services';
 import { JwtAuthGuard } from '@/api/guards/jwt-auth.guard';
 import { UpdateProfileDto } from '@/api/dtos/profile.dto';
 import { UpdateProfileValidatePipe } from '../validations/update-profile.validation';
+import { PaginateDto } from '@/shared/pagination/paginate.dto';
+import { HttpCacheInterceptor } from '../cache';
 
 @ApiTags('Profile')
 @Controller('profile')
 @ApiBearerAuth()
 export class ProfileController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private notificationService: NotificationService,
+  ) {}
 
   @Get('')
   @ApiBearerAuth()
@@ -41,6 +48,35 @@ export class ProfileController {
     return {
       statusCode: HttpStatus.OK,
       data: newUser,
+    };
+  }
+
+  @Get('notifications')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  public async getListNotification(
+    @Request() req: any,
+    @Query() filter: PaginateDto,
+  ) {
+    const result = await this.notificationService.getListNotifications({
+      ...filter,
+      user_ids: [req.user.sub],
+    });
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
+    };
+  }
+
+  @Get('unread-notifications')
+  @UseInterceptors(HttpCacheInterceptor)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  public async getUnreadNotification(@Request() req: any) {
+    const result = await this.userService.countUnreadNotification(req.user.id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: result,
     };
   }
 }

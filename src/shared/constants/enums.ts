@@ -32,6 +32,8 @@ export enum ETaskType {
   STORY = 'story',
   TASK = 'task',
   SUBTASK = 'subtask',
+  BUG = 'bug',
+  SUB_BUG = 'sub_bug',
 }
 
 export enum ENotificationStatus {

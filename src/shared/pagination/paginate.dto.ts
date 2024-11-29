@@ -33,12 +33,12 @@ export class PaginateDto implements IPaginateRequest {
   page?: number;
 
   @ApiPropertyOptional()
-  sort_field: string = 'created_at';
+  sort_field?: string = 'created_at';
 
   @ApiPropertyOptional({
     type: 'enum',
     enum: ESortType,
   })
   @IsOptional()
-  sort_type: ESortType = ESortType.DESC;
+  sort_type?: ESortType = ESortType.DESC;
 }
