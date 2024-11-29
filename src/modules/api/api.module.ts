@@ -1,6 +1,12 @@
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { DatabaseModule } from '@/database';
-import { AuthController, HealthController } from '@/api/controllers';
+import {
+  AuthController,
+  HealthController,
+  ProfileController,
+  ProjectController,
+  UserController,
+} from '@/api/controllers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { QueueModule } from '@/queue/queue.module';
@@ -12,10 +18,24 @@ import { CacheModule, CacheStore } from '@nestjs/cache-manager';
 import { configAuth } from './configs/auth';
 import { configCache } from './configs/cache';
 import { GoogleStrategy } from './auth-strategies';
-import { AuthService } from '@/api/services';
+import {
+  AuthService,
+  UserService,
+  CommentService,
+  TaskService,
+  ProjectService,
+  NotificationService,
+} from '@/api/services';
 
 const authStrategies = [GoogleStrategy];
-const services = [AuthService];
+const services = [
+  AuthService,
+  UserService,
+  CommentService,
+  TaskService,
+  ProjectService,
+  NotificationService,
+];
 
 @Module({
   imports: [
@@ -52,7 +72,13 @@ const services = [AuthService];
       inject: [ConfigService],
     }),
   ],
-  controllers: [HealthController, AuthController],
+  controllers: [
+    HealthController,
+    AuthController,
+    ProfileController,
+    UserController,
+    ProjectController,
+  ],
   providers: [
     {
       provide: APP_GUARD,
