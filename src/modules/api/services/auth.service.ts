@@ -13,7 +13,7 @@ export class AuthService {
     private userRepository: UserRepository,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   loginWithGoogleOauth = async (user: TGoogleProfile) => {
     const whereCondition = { google_id: user.id };
