@@ -49,7 +49,7 @@ pnpm install
 ```
 
 # Start development server
-
+Run the following command to start the development server: and access the API via http://localhost:{port}/docs
 ```
 npm run start:dev
 ```
