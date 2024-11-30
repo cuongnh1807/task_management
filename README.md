@@ -195,26 +195,35 @@ export class NotificationGateway {
 ```typescript
 // src/modules/api/cache/http-cache.interceptor.ts
 @Injectable()
-export class HttpCacheInterceptor implements NestInterceptor {
+export class HttpCacheInterceptor implements CacheInterceptor {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private reflector: Reflector,
   ) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+  trackBy(context: ExecutionContext): string | undefined {
     const request = context.switchToHttp().getRequest();
-    const key = this.generateKey(request);
-    
-    const cachedResponse = await this.cacheManager.get(key);
-    if (cachedResponse) {
-      return of(cachedResponse);
+    const { httpAdapter } = this.httpAdapterHost;
+
+    const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
+    const excludePaths = [
+      // Routes to be excluded
+    ];
+    if (
+      !isGetRequest ||
+      (isGetRequest &&
+        excludePaths.includes(httpAdapter.getRequestUrl(request)))
+    ) {
+      return undefined;
     }
-    
-    return next.handle().pipe(
-      tap(response => {
-        this.cacheManager.set(key, response, { ttl: 60 });
+    const { query } = context.getArgByIndex(0);
+    const hash = SHA256(
+      JSON.stringify({
+        query,
+        headers: { authorization: request?.headers?.authorization },
       }),
-    );
+    ).toString();
+    return `${httpAdapter.getRequestUrl(request)}_${hash}`;
   }
 }
 ```
@@ -222,23 +231,61 @@ export class HttpCacheInterceptor implements NestInterceptor {
 ### 3. Error Handling
 **Implementation:**
 ```typescript
-// src/shared/filters/http-exception.filter.ts
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
+// src/modules/api/filters/GlobalExceptionFilter.ts
+@Catch()
+export class GlobalExceptionFilter implements ExceptionFilter {
+  public catch(exception: any, host: ArgumentsHost): any {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const status = exception.getStatus();
-    const exceptionResponse = exception.getResponse();
+    const request = ctx.getRequest<Request>();
 
-    response
-      .status(status)
-      .json({
-        statusCode: status,
-        timestamp: new Date().toISOString(),
-        path: ctx.getRequest().url,
-        message: exceptionResponse['message'] || exception.message,
-      });
+    const responseStatus = exception.status
+      ? exception.status
+      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const messageObject = this.getBackwardsCompatibleMessageObject(
+      exception,
+      responseStatus,
+    );
+    let errorId = undefined;
+    let integrationErrorDetails = undefined;
+
+    if (responseStatus === HttpStatus.INTERNAL_SERVER_ERROR) {
+      errorId = uuidv1();
+      integrationErrorDetails =
+        GlobalExceptionFilter.extractIntegrationErrorDetails(exception);
+
+      console.error(
+        {
+          errorId: errorId,
+          route: request.url,
+          integrationErrorDetails,
+          stack:
+            exception.stack && JSON.stringify(exception.stack, ['stack'], 4),
+        },
+        messageObject,
+      );
+    } else if (
+      this.logAllErrors ||
+      this.logErrorsWithStatusCode.indexOf(responseStatus) !== -1
+    ) {
+      console.error(
+        {
+          route: request.url,
+          stack: exception.stack && JSON.stringify(exception.stack),
+        },
+        messageObject,
+      );
+    }
+
+    response.status(responseStatus).json({
+      errorId: errorId,
+      ...this.getClientResponseMessage(responseStatus, exception),
+      integrationErrorDetails:
+        responseStatus === HttpStatus.INTERNAL_SERVER_ERROR &&
+        this.sendClientInternalServerErrorCause
+          ? integrationErrorDetails
+          : undefined,
+    });
   }
 }
 ```
@@ -266,29 +313,7 @@ async function bootstrap() {
 
 ### 5. Monitoring & Logging
 **Implementation:**
-```typescript
-// src/shared/interceptors/logging.interceptor.ts
-@Injectable()
-export class LoggingInterceptor implements NestInterceptor {
-  private logger = new Logger('HTTP');
-
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const method = request.method;
-    const url = request.url;
-
-    const now = Date.now();
-
-    return next.handle().pipe(
-      tap(() => {
-        this.logger.log(
-          `${method} ${url} ${Date.now() - now}ms`,
-        );
-      }),
-    );
-  }
-}
-```
+We use Logger in @nestjs/common to log the information and error and custom logging
 
 ## Testing
 
