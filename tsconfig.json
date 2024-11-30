@@ -9,7 +9,8 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./src",
+    "baseUrl": ".",
+    "rootDir": ".",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -20,15 +21,20 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "@/database": ["modules/database/index"],
-      "@/database/*": ["modules/database/*"],
-      "@/api": ["modules/api/index"],
-      "@/api/*": ["modules/api/*"],
-      "@/shared/*": ["shared/*"],
-      "@/worker/*": ["modules/worker/*"],
-      "@/queue/*": ["modules/queue/*"],
-      "@/sentry/*": ["modules/sentry//*"]
+     "@/database": ["src/modules/database/index"],
+      "@/database/*": ["src/modules/database/*"],
+      "@/api": ["src/modules/api/index"],
+      "@/api/*": ["src/modules/api/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/worker/*": ["src/modules/worker/*"],
+      "@/queue/*": ["src/modules/queue/*"],
+      "@/sentry/*": ["src/modules/sentry/*"],
+      "@/socket-gateway/*": ["src/modules/socket-gateway/*"],
+      "@test/*": ["test/*"]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ]
 }

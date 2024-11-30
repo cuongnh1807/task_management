@@ -13,7 +13,7 @@ export class AuthService {
     private userRepository: UserRepository,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   loginWithGoogleOauth = async (user: TGoogleProfile) => {
     const whereCondition = { google_id: user.id };
@@ -54,7 +54,7 @@ export class AuthService {
     if (!user.password) {
       throw new BadRequestException('Please sign-in by another method!!');
     }
-    if (!compare(user.password, data.password)) {
+    if (!compare(data.password, user.password)) {
       throw new BadRequestException('Wrong password');
     }
     return this._createAccessToken(user);

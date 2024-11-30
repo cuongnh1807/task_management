@@ -69,7 +69,7 @@ export class CreateTaskDto {
   parent_task_id?: string;
 
   @ApiPropertyOptional({
-    example: 'the due date',
+    example: '2024-12-31',
   })
   @IsOptional()
   @Transform(({ value }) => new Date(value))
@@ -143,10 +143,10 @@ export class UpdateTaskDto {
   })
   @IsOptional()
   @IsUUID(4)
-  parent_task_id?: string;
+  parent_task_id?: string | null;
 
   @ApiPropertyOptional({
-    example: 'the due date',
+    example: '2024-12-31',
   })
   @IsOptional()
   @Transform(({ value }) => new Date(value))

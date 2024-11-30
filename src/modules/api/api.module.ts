@@ -1,5 +1,5 @@
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
-import { DatabaseModule } from '@/database';
+import { DatabaseModule } from '@/database/database.module';
 import {
   AuthController,
   CommentController,
@@ -28,7 +28,7 @@ import {
   ProjectService,
   NotificationService,
 } from '@/api/services';
-import { GatewayModule } from 'modules/socket-gateway/socket-gateway.module';
+import { GatewayModule } from '@/socket-gateway/socket-gateway.module';
 
 const authStrategies = [GoogleStrategy];
 const services = [
@@ -95,7 +95,7 @@ const services = [
   ],
 })
 export class ApiModule implements OnApplicationBootstrap {
-  constructor() {}
+  constructor() { }
 
-  async onApplicationBootstrap() {}
+  async onApplicationBootstrap() { }
 }

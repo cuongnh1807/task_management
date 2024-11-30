@@ -11,7 +11,7 @@ import {
   ETaskStatus,
 } from '@/shared/constants/enums';
 import { TaskFilter } from '@/shared/filters/task.filter';
-import { RealtimeService } from 'modules/socket-gateway/services/realtime.service';
+import { RealtimeService } from '@/socket-gateway/services/realtime.service';
 
 @Injectable()
 export class TaskService {
@@ -88,11 +88,11 @@ export class TaskService {
       },
       assignee: task?.assignee
         ? {
-          id: task?.assignee.id,
-          username: task?.assignee?.username,
-          avatar_url: task?.assignee?.avatar_url,
-          email: task?.assignee?.email,
-        }
+            id: task?.assignee.id,
+            username: task?.assignee?.username,
+            avatar_url: task?.assignee?.avatar_url,
+            email: task?.assignee?.email,
+          }
         : null,
     };
   }

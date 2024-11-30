@@ -28,7 +28,7 @@ export class CreateCommentDto {
   attachment_urls?: string[];
 }
 
-export class GetCommentDto extends PaginateDto { }
+export class GetCommentDto extends PaginateDto {}
 
 export class UpdateCommentDto {
   @ApiPropertyOptional({

@@ -18,6 +18,10 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CreateTaskDto, GetTaskDto, UpdateTaskDto } from '../dtos/task.dto';
 import { HttpCacheInterceptor } from '../cache';
 import { GetCommentDto } from '../dtos/comment.dto';
+import {
+  UpdateTaskValidationPipe,
+  CreateTaskValidationPipe,
+} from '@/api/validations/';
 
 @Controller('tasks')
 @ApiTags('Tasks')
@@ -31,7 +35,10 @@ export class TaskController {
   @Post('')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  public async createTask(@Body() data: CreateTaskDto, @Request() req: any) {
+  public async createTask(
+    @Body(CreateTaskValidationPipe) data: CreateTaskDto,
+    @Request() req: any,
+  ) {
     const result = await this.taskService.createTask(req.user.sub, data);
     return {
       statusCode: HttpStatus.OK,
@@ -78,7 +85,7 @@ export class TaskController {
   @UseGuards(JwtAuthGuard)
   public async updateTask(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() data: UpdateTaskDto,
+    @Body(UpdateTaskValidationPipe) data: UpdateTaskDto,
   ) {
     const result = await this.taskService.updateTask(id, data);
     return {
