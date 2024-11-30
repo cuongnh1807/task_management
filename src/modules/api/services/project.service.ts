@@ -7,6 +7,7 @@ import {
 import { CreateProjectDto, UpdateProjectDto } from '@/api/dtos/project.dto';
 import { TProjectReponse } from '@/shared/types';
 import { ProjectEntity } from '@/database/entities';
+import { ProjectFilter } from '@/shared/filters/project.filter';
 
 @Injectable()
 export class ProjectService {
@@ -57,5 +58,15 @@ export class ProjectService {
       .execute();
 
     return this._formatProjectReponse(newProject.raw[0]);
+  }
+
+  async getListProject(query: ProjectFilter) {
+    const { items, meta } = await this.projectRepository.paginate({
+      ...query,
+    });
+    return {
+      items: items.map(this._formatProjectReponse),
+      meta,
+    };
   }
 }

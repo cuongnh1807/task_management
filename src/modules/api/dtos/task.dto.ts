@@ -132,6 +132,13 @@ export class UpdateTaskDto {
   priority?: EPriority;
 
   @ApiPropertyOptional({
+    example: ETaskStatus.IN_PROGRESS,
+  })
+  @IsOptional()
+  @IsEnum(ETaskStatus)
+  status?: ETaskStatus;
+
+  @ApiPropertyOptional({
     example: 'the parent task',
   })
   @IsOptional()
@@ -154,6 +161,7 @@ export class GetTaskDto extends PaginateDto {
     type: [String],
     format: 'form',
   })
+  @IsOptional()
   @TransformArrayString()
   @IsUUID(4, { each: true })
   assignee_ids?: string[];
@@ -163,6 +171,7 @@ export class GetTaskDto extends PaginateDto {
     type: [String],
     format: 'form',
   })
+  @IsOptional()
   @TransformArrayString()
   @IsUUID(4, { each: true })
   reporter_ids?: string[];
@@ -174,6 +183,7 @@ export class GetTaskDto extends PaginateDto {
   })
   @TransformArrayString()
   @IsUUID(4, { each: true })
+  @IsOptional()
   project_ids?: string[];
 
   @ApiPropertyOptional({
@@ -183,6 +193,7 @@ export class GetTaskDto extends PaginateDto {
   })
   @TransformArrayString()
   @IsEnum(ETaskType, { each: true })
+  @IsOptional()
   types?: ETaskType[];
 
   @ApiPropertyOptional({
@@ -190,6 +201,7 @@ export class GetTaskDto extends PaginateDto {
     type: [String],
     format: 'form',
   })
+  @IsOptional()
   @TransformArrayString()
   @IsEnum(ETaskStatus, { each: true })
   statuses?: ETaskStatus[];
@@ -201,6 +213,7 @@ export class GetTaskDto extends PaginateDto {
   })
   @TransformArrayString()
   @IsEnum(EPriority, { each: true })
+  @IsOptional()
   priorities?: EPriority[];
 
   @ApiPropertyOptional({

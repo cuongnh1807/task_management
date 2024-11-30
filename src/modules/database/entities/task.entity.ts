@@ -67,7 +67,7 @@ export class TaskEntity extends BaseEntity {
   @JoinColumn({ name: 'project_id' })
   project: ProjectEntity;
 
-  @OneToOne(() => TaskEntity, (e) => e.parent_task)
+  @ManyToOne(() => TaskEntity, (e) => e.parent_task)
   @JoinColumn({ name: 'parent_task_id' })
   parent_task: TaskEntity;
 

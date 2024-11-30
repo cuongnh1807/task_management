@@ -17,7 +17,7 @@ import { CommentService, TaskService } from '../services';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CreateTaskDto, GetTaskDto, UpdateTaskDto } from '../dtos/task.dto';
 import { HttpCacheInterceptor } from '../cache';
-import { CreateCommentDto, GetCommentDto } from '../dtos/comment.dto';
+import { GetCommentDto } from '../dtos/comment.dto';
 
 @Controller('tasks')
 @ApiTags('Tasks')
@@ -52,7 +52,7 @@ export class TaskController {
         'task.description',
         'task.status',
         'task.priority',
-        'task.code',
+        'task.increment_id',
         'task.type',
       ],
     });
@@ -84,24 +84,6 @@ export class TaskController {
     return {
       statusCode: HttpStatus.OK,
       data: result,
-    };
-  }
-
-  @Post('/:id/comments')
-  @UseGuards(JwtAuthGuard)
-  public async createComment(
-    @Request() req: any,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() data: CreateCommentDto,
-  ) {
-    const newComment = await this.commentService.createComment(
-      id,
-      req.user.sub,
-      data,
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      data: newComment,
     };
   }
 

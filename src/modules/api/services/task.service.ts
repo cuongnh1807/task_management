@@ -1,13 +1,27 @@
-import { TaskRepository } from '@/database/repositories';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  NotificationRepository,
+  TaskRepository,
+} from '@/database/repositories';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto, UpdateTaskDto } from '@/api/dtos/task.dto';
 import { TaskEntity } from '@/database/entities';
-import { ETaskStatus } from '@/shared/constants/enums';
+import {
+  ENotificationMessage,
+  ENotificationStatus,
+  ETaskStatus,
+} from '@/shared/constants/enums';
 import { TaskFilter } from '@/shared/filters/task.filter';
+import { RealtimeService } from 'modules/socket-gateway/services/realtime.service';
 
 @Injectable()
 export class TaskService {
-  constructor(private taskRepository: TaskRepository) {}
+  constructor(
+    private taskRepository: TaskRepository,
+    private notificationRepository: NotificationRepository,
+
+    @Inject(RealtimeService)
+    private realtimeService: RealtimeService,
+  ) {}
 
   private formatTaskResponse(task: TaskEntity) {
     return {
@@ -28,13 +42,31 @@ export class TaskService {
       reporter_id: user_id,
       status: ETaskStatus.TODO,
     });
+
+    // create notification to assignee
+    try {
+      await this.notificationRepository.save({
+        user_id: data.assignee_id,
+        task_id: newTask.id,
+        status: ENotificationStatus.UNREAD,
+        content: `You have a new task: ${newTask.title}`,
+      });
+      this.realtimeService.sendMessageBoardCast(
+        `${ENotificationMessage.NEW_TASK}:${data.assignee_id}`,
+        {
+          content: `You have a new task: ${newTask.title}`,
+          task_id: newTask.id,
+        },
+      );
+    } catch (error) {
+      console.log(error);
+    }
     return this.formatTaskResponse(newTask);
   }
 
   async getDetailTask(id: string) {
     const task = await this.taskRepository.findOne({
       where: { id },
-      relationLoadStrategy: 'query',
       relations: {
         parent_task: true,
         project: true,
@@ -56,10 +88,11 @@ export class TaskService {
       },
       assignee: task?.assignee
         ? {
-            id: task?.assignee.id,
-            username: task?.assignee?.username,
-            avatar_url: task?.assignee?.avatar_url,
-          }
+          id: task?.assignee.id,
+          username: task?.assignee?.username,
+          avatar_url: task?.assignee?.avatar_url,
+          email: task?.assignee?.email,
+        }
         : null,
     };
   }
@@ -73,6 +106,6 @@ export class TaskService {
     const { items, meta } = await this.taskRepository.paginate({
       ...filter,
     });
-    return { items, meta };
+    return { items: items.map(this.formatTaskResponse), meta };
   }
 }

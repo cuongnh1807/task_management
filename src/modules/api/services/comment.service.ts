@@ -1,8 +1,12 @@
 import { CommentRepository, UserRepository } from '@/database/repositories';
 import { CommentFilter } from '@/shared/filters/comment.filter';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { In } from 'typeorm';
-import { CreateCommentDto } from '../dtos/comment.dto';
+import { CreateCommentDto, UpdateCommentDto } from '../dtos/comment.dto';
 
 @Injectable()
 export class CommentService {
@@ -56,16 +60,29 @@ export class CommentService {
     };
   }
 
-  async createComment(
-    task_id: string,
-    user_id: string,
-    data: CreateCommentDto,
-  ) {
+  async createComment(user_id: string, data: CreateCommentDto) {
     const newComment = await this.commentRepository.save({
-      task_id,
       user_id,
-      data,
+      ...data,
     });
     return await this.getDetailComment(newComment.id);
+  }
+
+  async updateComment(id: string, data: UpdateCommentDto) {
+    await this.commentRepository.update({ id }, data);
+    return await this.getDetailComment(id);
+  }
+
+  async deleteComment(id: string, user_id: string) {
+    const currentComment = await this.commentRepository.findOne({
+      where: { id, user_id },
+    });
+    if (!currentComment) {
+      throw new NotFoundException('Notfound comment');
+    }
+    if (currentComment.user_id !== user_id) {
+      throw new ForbiddenException('You not have permission to delete');
+    }
+    await this.commentRepository.delete({ id });
   }
 }

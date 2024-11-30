@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ApiModule } from '@/api';
-import { WorkerModule } from '@/worker/worker.module';
+import { GatewayModule } from 'modules/socket-gateway/socket-gateway.module';
 
 const isApi = Boolean(Number(process.env.IS_API || 0));
-const isWorker = Boolean(Number(process.env.IS_WORKER || 0));
 
 let _modules = [];
 if (isApi) {
-  _modules = [..._modules, ApiModule];
+  _modules = [..._modules, ApiModule, GatewayModule];
 }
-if (isWorker) {
-  _modules = [..._modules, WorkerModule];
-}
+
 @Module({
   imports: [..._modules],
   providers: [],

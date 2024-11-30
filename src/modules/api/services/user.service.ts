@@ -2,7 +2,7 @@ import {
   NotificationRepository,
   UserRepository,
 } from '@/database/repositories';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdateProfileDto } from '@/api/dtos/profile.dto';
 import { NotificationEntity, UserEntity } from '@/database/entities';
 import { GetUserDto } from '@/api/dtos/user.dto';
@@ -65,22 +65,6 @@ export class UserService {
     });
     const result = await query.getCount();
     return result;
-  }
-
-  async readNotification(user_id: string, id: string) {
-    const existedNotification = await this.notificationRepository.findOneBy({
-      id,
-    });
-    if (existedNotification.user_id !== user_id) {
-      throw new BadRequestException('Not allow to change notification status');
-    }
-    if (existedNotification.status === ENotificationStatus.READ) {
-      throw new BadRequestException('notification was read');
-    }
-    await this.notificationRepository.save({
-      ...existedNotification,
-      status: ENotificationStatus.READ,
-    });
   }
 
   async markReadAllNotification(user_id: string) {

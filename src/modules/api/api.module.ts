@@ -2,14 +2,16 @@ import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { DatabaseModule } from '@/database';
 import {
   AuthController,
+  CommentController,
   HealthController,
+  NotificationController,
   ProfileController,
   ProjectController,
+  TaskController,
   UserController,
 } from '@/api/controllers';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { QueueModule } from '@/queue/queue.module';
 import { APP_GUARD } from '@nestjs/core';
 import { CustomThrottlerGuard } from './guards/custom-throttler.guard';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -26,6 +28,7 @@ import {
   ProjectService,
   NotificationService,
 } from '@/api/services';
+import { GatewayModule } from 'modules/socket-gateway/socket-gateway.module';
 
 const authStrategies = [GoogleStrategy];
 const services = [
@@ -44,7 +47,7 @@ const services = [
       limit: process.env.APP_ENV === 'production' ? 60 : 600,
     }),
     DatabaseModule,
-    QueueModule,
+    GatewayModule,
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -78,6 +81,9 @@ const services = [
     ProfileController,
     UserController,
     ProjectController,
+    TaskController,
+    CommentController,
+    NotificationController,
   ],
   providers: [
     {

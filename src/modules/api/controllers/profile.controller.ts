@@ -79,4 +79,14 @@ export class ProfileController {
       data: result,
     };
   }
+  @Put('read-all-notifications')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  public async readAllNotifications(@Request() req: any) {
+    await this.userService.markReadAllNotification(req.user.id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: true,
+    };
+  }
 }

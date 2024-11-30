@@ -40,3 +40,7 @@ export enum ENotificationStatus {
   READ = 'read',
   UNREAD = 'unread',
 }
+
+export enum ENotificationMessage {
+  NEW_TASK = 'newtask',
+}

@@ -9,7 +9,7 @@ export class RegisterUserValidatePipe implements PipeTransform<any> {
     const existedUser = await this.userRepository.findOneBy({
       username: value.username,
     });
-    if (!existedUser) {
+    if (existedUser) {
       throw new BadRequestException('The username existed');
     }
     return value;
